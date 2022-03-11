@@ -63,10 +63,10 @@ class HomePage extends StatelessWidget {
                     },
                     title: names[index],
                     onButtonPressed: () {
-                      controller.sendData('${messages[names[index]]!}/1');
+                      controller.sendData('${messages[names[index]]!}/1/');
                     },
                     onButtonLongPress: () {
-                      controller.sendData('${messages[names[index]]!}/0');
+                      controller.sendData('${messages[names[index]]!}/0/');
                     },
                   );
                 },
