@@ -14,7 +14,7 @@ void main() => runApp(GetMaterialApp(
   ),
   debugShowCheckedModeBanner: false,
   title: 'Генератор отчёта',
-  initialRoute: '/',
+  initialRoute: '/devices',
   getPages: [
     GetPage(
       name: '/',

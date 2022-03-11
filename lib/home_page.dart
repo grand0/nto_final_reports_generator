@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:get/get.dart';
 import 'package:nto_final_reports_generator/checklist_controller.dart';
 import 'package:nto_final_reports_generator/connection_controller.dart';
@@ -10,7 +11,9 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (Get.arguments == null || Get.arguments is! String) {
-      Get.offNamed('/devices');
+      SchedulerBinding.instance?.addPostFrameCallback((_) {
+        Get.offNamed('/devices');
+      });
     }
 
     ConnectionController controller =
@@ -22,15 +25,15 @@ class HomePage extends StatelessWidget {
     List<String> jsonNames =
         ContainerDevice.values.map((e) => e.getJsonName()).toList();
     Map<String, String> messages = {
-      'servoRed': '',
-      'servoGreen': '',
-      'servoBlue': '',
-      'typeRed': '',
-      'typeGreen': '',
-      'typeBlue': '',
-      'overflowRed': '',
-      'overflowGreen': '',
-      'overflowBlue': '',
+      'servoRed': 's/r',
+      'servoGreen': 's/g',
+      'servoBlue': 's/b',
+      'typeRed': 't/r',
+      'typeGreen': 't/g',
+      'typeBlue': 't/b',
+      'overflowRed': 'o/r',
+      'overflowGreen': 'o/g',
+      'overflowBlue': 'o/b',
     };
 
     return Scaffold(
@@ -50,7 +53,10 @@ class HomePage extends StatelessWidget {
                     },
                     title: names[index],
                     onButtonPressed: () {
-                      controller.sendData(messages[names[index]]!);
+                      controller.sendData('${messages[names[index]]!}/1');
+                    },
+                    onButtonLongPress: () {
+                      controller.sendData('${messages[names[index]]!}/0');
                     },
                   );
                 },
@@ -75,12 +81,14 @@ class TestingRow extends StatefulWidget {
   final void Function(bool value) onChanged;
   final String title;
   final void Function() onButtonPressed;
+  final void Function() onButtonLongPress;
 
   const TestingRow({
     Key? key,
     required this.onChanged,
     required this.title,
     required this.onButtonPressed,
+    required this.onButtonLongPress,
   }) : super(key: key);
 
   @override
@@ -105,6 +113,7 @@ class _TestingRowState extends State<TestingRow> {
       title: Text(widget.title),
       trailing: TextButton(
         onPressed: () => widget.onButtonPressed,
+        onLongPress: () => widget.onButtonLongPress,
         child: const Text('Тест'),
       ),
     );
