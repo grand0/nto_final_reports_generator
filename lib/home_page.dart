@@ -10,14 +10,15 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (Get.arguments == null || Get.arguments is! String) {
+    final address = Get.arguments;
+
+    if (address == null || address is! String) {
       SchedulerBinding.instance?.addPostFrameCallback((_) {
         Get.offNamed('/devices');
       });
     }
 
-    ConnectionController controller =
-        Get.put(ConnectionController(Get.arguments));
+    ConnectionController controller = Get.put(ConnectionController(address));
 
     final checklistController = Get.put(ChecklistController());
     List<String> names =
@@ -38,7 +39,16 @@ class HomePage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Генератор отчёта'),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Генератор отчёта'),
+            Text(
+              address,
+              style: TextStyle(color: Colors.grey.shade400, fontSize: 14),
+            ),
+          ],
+        ),
       ),
       body: controller.obx(
         (conn) => Column(
@@ -62,11 +72,42 @@ class HomePage extends StatelessWidget {
                 },
               ),
             ),
-            ElevatedButton(
-              onPressed: () {
-                checklistController.send();
-              },
-              child: const Text('Отправить отчёт'),
+            checklistController.obx(
+              (_) => Column(
+                children: [
+                  const Text(
+                    'Успешно',
+                    style: TextStyle(color: Colors.green),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      checklistController.send();
+                    },
+                    child: const Text('Отправить отчёт'),
+                  ),
+                ],
+              ),
+              onEmpty: ElevatedButton(
+                onPressed: () {
+                  checklistController.send();
+                },
+                child: const Text('Отправить отчёт'),
+              ),
+              onLoading: const CircularProgressIndicator(),
+              onError: (err) => Column(
+                children: [
+                  Text(
+                    err ?? 'Неизвестная ошибка',
+                    style: const TextStyle(color: Colors.red),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      checklistController.send();
+                    },
+                    child: const Text('Отправить отчёт'),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -98,16 +139,20 @@ class TestingRow extends StatefulWidget {
 class _TestingRowState extends State<TestingRow> {
   bool value = false;
 
+  void changeValue(bool value) {
+    setState(() {
+      this.value = value;
+    });
+    widget.onChanged(this.value);
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListTile(
       leading: Checkbox(
         value: value,
         onChanged: (bool? value) {
-          setState(() {
-            this.value = value ?? true;
-          });
-          widget.onChanged(this.value);
+          changeValue(value ?? true);
         },
       ),
       title: Text(widget.title),
@@ -116,6 +161,7 @@ class _TestingRowState extends State<TestingRow> {
         onLongPress: () => widget.onButtonLongPress,
         child: const Text('Тест'),
       ),
+      onTap: () => changeValue(!value),
     );
   }
 }

@@ -8,11 +8,12 @@ class ConnectionController extends GetxController with StateMixin<BluetoothConne
 
   ConnectionController(this.address) {
     connect();
+    // change(null, status: RxStatus.success());
   }
 
   @override
   void onClose() {
-    state?.close();
+    state?.finish();
     super.onClose();
   }
 
